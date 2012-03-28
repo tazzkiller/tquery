@@ -13,12 +13,10 @@
 	var texture	= tQuery.createVideoTexture('sintel.ogv');
 
 	var material	= new THREE.MeshBasicMaterial({
-		ambient	: 0x444444,
-		color	: 0xFFAA88,
 		map	: texture
 	});
 
 	tQuery.createSphere(material).addTo(world)
-		.rotateY(-90*Math.PI/180);
+		.rotateY(-Math.PI/2);
 
 </script></body>

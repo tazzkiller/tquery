@@ -36,21 +36,21 @@
 
 	// CHARACTER
 	character	= new tQuery.MD2Character();
-	character.scale	= 0.03;
+	character.scale(0.03);
 	character.bind("loaded", function(){
-		console.log("list animmation", Object.keys(character.meshBody.geometry.animations))
+		console.log("list animmation", Object.keys(character._meshBody.geometry.animations))
 		//character.setPlaybackRate(6);
-		//character.setSkin(2)
-		//character.setWeapon(9)
+		character.setSkin(2);
+		character.setWeapon(0);
 		//character.setWireframe(true);
 	});
 	character.loadParts({
 		baseUrl	: "ratamahatta/",
 		body	: "ratamahatta.js",
-		skins	: [ "ratamahatta.png"],
-		//skins	: [ "ratamahatta.png", "ctf_b.png", "ctf_r.png", "dead.png", "gearwhore.png" ],
+		//skins	: [ "ratamahatta.png"],
+		skins	: [ "ratamahatta.png", "ctf_b.png", "ctf_r.png", "dead.png", "gearwhore.png" ],
 		weapons	: [
-			//[ "weapon.js", "weapon.png" ],
+			[ "weapon.js", "weapon.png" ],
 			//[ "w_bfg.js", "w_bfg.png" ],
 			//[ "w_blaster.js", "w_blaster.png" ],
 			//[ "w_chaingun.js", "w_chaingun.png" ],

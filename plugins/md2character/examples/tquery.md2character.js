@@ -11,12 +11,12 @@
  * widely inspired from MD2Character.js from alteredq / http://alteredqualia.com/
 */
 tQuery.register('MD2Character', function(){
-	this.scale		= 1;
+	this._scale		= 1;
 	this.animationFPS	= 6;
 
 	this._root		= new THREE.Object3D();
-	this.meshBody		= null;
-	this.meshWeapon		= null;
+	this._meshBody		= null;
+	this._meshWeapon	= null;
 
 	this.skinsBody		= [];
 	this.skinsWeapon	= [];
@@ -34,17 +34,25 @@ tQuery.MicroeventMixin(tQuery.MD2Character.prototype);
 //										//
 //////////////////////////////////////////////////////////////////////////////////
 
-tQuery.MD2Character.prototype.update	= function( delta )
+/**
+ * Update the animation
+ * 
+ * @param {Number} deltaSeconds nb seconds since the last update
+*/
+tQuery.MD2Character.prototype.update	= function( deltaSeconds )
 {
-	if ( this.meshBody ) {
-		this.meshBody.updateAnimation( 1000 * delta );
+	if ( this._meshBody ) {
+		this._meshBody.updateAnimation( 1000 * deltaSeconds );
 	}
-	if ( this.meshWeapon ) {
-		this.meshWeapon.updateAnimation( 1000 * delta );
+	if ( this._meshWeapon ) {
+		this._meshWeapon.updateAnimation( 1000 * deltaSeconds );
 	}
 	return this;	// for chained API
 };
 
+/**
+ * @returns {THREE.Object3D} the object3D containing the object
+*/
 tQuery.MD2Character.prototype.container	= function(){
 	return this._root;
 }
@@ -52,6 +60,13 @@ tQuery.MD2Character.prototype.container	= function(){
 tQuery.MD2Character.prototype.isLoaded	= function(){
 	return this._nLoadInProgress === 0 ? true : false;
 }
+
+tQuery.MD2Character.prototype.scale	= function(value){
+	if( value === undefined )	return this._scale;
+	this._scale	= value;
+	return this;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //		Setter								//
@@ -61,11 +76,11 @@ tQuery.MD2Character.prototype.setWireframe = function ( enable )
 {
 	// TODO remove the added property on THREE.Mesh
 	if( enable ){
-		if ( this.meshBody )	this.meshBody.material	= this.meshBody.materialWireframe;
-		if ( this.meshWeapon )	this.meshWeapon.material= this.meshWeapon.materialWireframe;
+		if ( this._meshBody )	this._meshBody.material	= this._meshBody.materialWireframe;
+		if ( this._meshWeapon )	this._meshWeapon.material= this._meshWeapon.materialWireframe;
 	} else {
-		if ( this.meshBody )	this.meshBody.material	= this.meshBody.materialTexture;
-		if ( this.meshWeapon )	this.meshWeapon.material= this.meshWeapon.materialTexture;
+		if ( this._meshBody )	this._meshBody.material	= this._meshBody.materialTexture;
+		if ( this._meshWeapon )	this._meshWeapon.material= this._meshWeapon.materialTexture;
 	}
 	return this;	// for chained API
 };
@@ -81,28 +96,28 @@ tQuery.MD2Character.prototype.setWeapon = function ( index )
 
 	if( activeWeapon ){
 		activeWeapon.visible	= true;
-		this.meshWeapon		= activeWeapon;
+		this._meshWeapon		= activeWeapon;
 
 		activeWeapon.playAnimation( this.activeAnimation, this.animationFPS );
 
-		this.meshWeapon.baseDuration	= this.meshWeapon.duration;
+		this._meshWeapon.baseDuration	= this._meshWeapon.duration;
 
-		this.meshWeapon.time		= this.meshBody.time;
-		this.meshWeapon.duration	= this.meshBody.duration;
+		this._meshWeapon.time		= this._meshBody.time;
+		this._meshWeapon.duration	= this._meshBody.duration;
 	}
 	return this;	// for chained API
 };
 
 tQuery.MD2Character.prototype.setAnimation = function( animationName )
 {
-	if ( this.meshBody ) {
-		this.meshBody.playAnimation( animationName, this.animationFPS );
-		this.meshBody.baseDuration	= this.meshBody.duration;
+	if ( this._meshBody ) {
+		this._meshBody.playAnimation( animationName, this.animationFPS );
+		this._meshBody.baseDuration	= this._meshBody.duration;
 	}
-	if ( this.meshWeapon ) {
-		this.meshWeapon.playAnimation( animationName, this.animationFPS );
-		this.meshWeapon.baseDuration	= this.meshWeapon.duration;
-		this.meshWeapon.time		= this.meshBody.time;
+	if ( this._meshWeapon ) {
+		this._meshWeapon.playAnimation( animationName, this.animationFPS );
+		this._meshWeapon.baseDuration	= this._meshWeapon.duration;
+		this._meshWeapon.time		= this._meshBody.time;
 	}
 	this.activeAnimation = animationName;
 	return this;	// for chained API
@@ -110,19 +125,19 @@ tQuery.MD2Character.prototype.setAnimation = function( animationName )
 
 tQuery.MD2Character.prototype.setPlaybackRate	= function( rate )
 {
-	if ( this.meshBody ){
-		this.meshBody.duration = this.meshBody.baseDuration / rate;
+	if ( this._meshBody ){
+		this._meshBody.duration = this._meshBody.baseDuration / rate;
 	}
-	if ( this.meshWeapon ){
-		this.meshWeapon.duration = this.meshWeapon.baseDuration / rate;
+	if ( this._meshWeapon ){
+		this._meshWeapon.duration = this._meshWeapon.baseDuration / rate;
 	}
 	return this;	// for chained API
 };
 
 tQuery.MD2Character.prototype.setSkin	= function( index )
 {
-	if ( this.meshBody && this.meshBody.material.wireframe === false ) {
-		this.meshBody.material.map	= this.skinsBody[ index ];
+	if ( this._meshBody && this._meshBody.material.wireframe === false ) {
+		this._meshBody.material.map	= this.skinsBody[ index ];
 	}
 	return this;	// for chained API
 };
@@ -151,14 +166,14 @@ tQuery.MD2Character.prototype.loadParts		= function ( config )
 
 	loader.load( config.baseUrl + config.body, function( geometry ) {
 		geometry.computeBoundingBox();
-		_this._root.position.y	= - _this.scale * geometry.boundingBox.min.y;
+		_this._root.position.y	= - _this._scale * geometry.boundingBox.min.y;
 
 		var mesh	= createPart( geometry, _this.skinsBody[ 0 ] );
-		mesh.scale.set( _this.scale, _this.scale, _this.scale );
+		mesh.scale.set( _this._scale, _this._scale, _this._scale );
 
 		_this._root.add( mesh );
 
-		_this.meshBody		= mesh;
+		_this._meshBody		= mesh;
 		_this.activeAnimation	= geometry.firstAnimation;
 
 		_this._checkLoadingComplete();
@@ -169,7 +184,7 @@ tQuery.MD2Character.prototype.loadParts		= function ( config )
 	var generateCallback = function( index, name ){
 		return function( geometry ) {
 			var mesh	= createPart( geometry, _this.skinsWeapon[ index ] );
-			mesh.scale.set( _this.scale, _this.scale, _this.scale );
+			mesh.scale.set( _this._scale, _this._scale, _this._scale );
 			mesh.visible	= false;
 
 			mesh.name	= name;
@@ -177,7 +192,7 @@ tQuery.MD2Character.prototype.loadParts		= function ( config )
 			_this._root.add( mesh );
 
 			_this.weapons[ index ] = mesh;
-			_this.meshWeapon = mesh;
+			_this._meshWeapon = mesh;
 
 			_this._checkLoadingComplete();
 		}.bind(this);
